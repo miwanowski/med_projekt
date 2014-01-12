@@ -1,0 +1,1 @@
+Naglowki klas (.h)
