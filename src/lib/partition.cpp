@@ -9,6 +9,10 @@ Partition::Partition(long tableSize) {
 	tableSize_ = tableSize;
 }
 
+Partition::Partition() {
+	setRepresentation_ = Partition::SetRepresentation();
+}
+
 Partition::~Partition() {
 	for (SetRepresentation::iterator it = setRepresentation_.begin(); it != setRepresentation_.end(); ++it) {
 		delete *it;

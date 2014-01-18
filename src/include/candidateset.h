@@ -18,7 +18,7 @@ private:
 
 public:
 	// create an empty candidate set:
-	CandidateSet();
+	CandidateSet() { } ;
 
 	// get the number of candidates in the set:
 	long getSize() const;

@@ -24,6 +24,7 @@ private:
 
 public:
 	// construct an empty partition:
+	Partition();
 	Partition(long tableSize);
 
 	// delete all groups:
@@ -32,8 +33,9 @@ public:
 	// get the number of groups:
 	long getGroupCount() const;
 
-	// accessor for tableSize_:
+	// accessors for tableSize_:
 	long getTableSize() const { return tableSize_; }
+	void setTableSize(long tableSize) { tableSize_ = tableSize; }
 
 	// get the array representation:
 	ArrayRepresentation* getArrayRepresentation() const;

@@ -1,6 +1,14 @@
 #include <cstddef>
+#include <fstream>
+#include <string>
+#include <iostream>
+#include <sstream>
+#include <algorithm>
 
 #include "fun.h"
+#include "utils.h"
+#include "candidate.h"
+#include "candidateset.h"
 
 Partition* Fun::product(Partition* a, Partition* b) {
 	Partition* c = new Partition(a->getTableSize());
@@ -43,4 +51,75 @@ bool Fun::holds(Candidate* c, Partition* d) {
 	}
 	delete t;
 	return true;
+}
+
+void Fun::generateInitialCandidates(const std::string& dataFilePath, 	// path to data file
+									const AttributeIds aIds,			// list of attribute Ids
+									const AttributeId targetId,			// target attribute Id
+									CandidateSet* cs,					// return: candidate set
+									Partition* targetPartition) {		// return: target partition
+	std::ifstream dataFile (dataFilePath.c_str());
+	if (dataFile.is_open()) {
+		std::string headerLine;
+		std::getline(dataFile, headerLine);
+		std::vector<std::string> splitHeader = split(headerLine, ',');
+		//cs = new CandidateSet();
+		for (AttributeIds::const_iterator it = aIds.begin(); it != aIds.end(); ++it) {
+			Candidate* newCandidate = new Candidate(new Partition());
+			Candidate::AttributeList* newAttributeList = new Candidate::AttributeList();
+			newAttributeList->push_back(splitHeader[*it]);
+			newCandidate->setAttributeList(newAttributeList);
+			cs->addCandidate(newCandidate);
+		}
+		std::string line;
+		std::vector<std::vector<std::string> > attributeLevels;
+		// initialize the vector of vectors of levels:
+		for (AttributeIds::const_iterator it = aIds.begin(); it != aIds.end(); ++it) {
+			attributeLevels.push_back(std::vector<std::string>());
+		}
+		std::vector<std::string> targetLevels;
+		while (std::getline(dataFile, line)) {
+			//std::cout << "parsing line: " << line << std::endl;
+			std::vector<std::string> splitLine = split(line, ',');
+			long instanceId;
+			std::istringstream ss(splitLine[0]);
+			ss >> instanceId;
+			// update attribute partitions:
+			for (AttributeIds::const_iterator it = aIds.begin(); it != aIds.end(); ++it) {
+				int attNo = it - aIds.begin();
+				int attCol = *it;
+				//std::cout << "parsing attribute " << attNo << " with column " << attCol << std::endl;
+				// find if the current attribute value is already among attribute levels:
+				std::vector<std::string>::iterator l = std::find(attributeLevels[attNo].begin(),
+																 attributeLevels[attNo].end(),
+																 splitLine[attCol]);
+				if (l == attributeLevels[attNo].end()) {
+					attributeLevels[attNo].push_back(splitLine[attCol]);
+					Group* newGroup = new Group();
+					newGroup->insert(instanceId);
+					(*cs)[attNo]->getPartition()->addGroup(newGroup);
+				} else {
+					int groupId = l - attributeLevels[attNo].begin();
+					(*cs)[attNo]->getPartition()->getGroup(groupId)->insert(instanceId);
+				}
+			}
+			// update target attribute partition:
+			std::vector<std::string>::iterator l = std::find(targetLevels.begin(),
+															 targetLevels.end(),
+															 splitLine[targetId]);
+			if (l == targetLevels.end()) {
+				targetLevels.push_back(splitLine[targetId]);
+				Group* newGroup = new Group();
+				newGroup->insert(instanceId);
+				targetPartition->addGroup(newGroup);
+			} else {
+				int groupId = l - targetLevels.begin();
+				targetPartition->getGroup(groupId)->insert(instanceId);
+			}
+
+		}
+		dataFile.close();
+	} else {
+		std::cout << "Unable to open the requested file." << std::endl;
+	}
 }

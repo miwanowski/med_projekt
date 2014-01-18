@@ -8,12 +8,15 @@
 #define CANDIDATE_H
 
 #include <vector>
+#include <string>
+
 #include "partition.h"
 
 class Candidate
 {
+public:
 	// temporary, maybe attributeType should be something different:
-	typedef char attributeType;
+	typedef std::string attributeType;
 	typedef std::vector<attributeType> AttributeList;
 
 private:

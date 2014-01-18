@@ -5,6 +5,8 @@
 #ifndef FUN_H
 #define FUN_H
 
+#include <string>
+
 #include "partition.h"
 #include "candidate.h"
 #include "candidateset.h"
@@ -13,6 +15,8 @@ class Fun {
 public:
 	typedef Partition::ArrayRepresentation ArrayRepresentation;
 	typedef Partition::Group Group;
+	typedef int AttributeId;
+	typedef std::vector<AttributeId> AttributeIds;
 
 	Fun(/* something here? */);
 
@@ -31,6 +35,13 @@ public:
 	// all variants of "Product" function:
 	static Partition* product(Partition* a, Partition* b);
 	static Partition* strippedPoduct(Partition* a, Partition* b);
+
+	// helper method for reading data file and generating initial candidates and partitions:
+	static void generateInitialCandidates(const std::string& dataFilePath, 	// path to data file
+										  const AttributeIds aIds,			// list of attribute Ids
+										  const AttributeId targetId,		// target attribute Id
+										  CandidateSet* cs,					// return: candidate set
+										  Partition* targetPartition);		// return: target partition
 };
 
 #endif
