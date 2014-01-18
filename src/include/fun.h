@@ -21,10 +21,13 @@ public:
 	Fun(/* something here? */);
 
 	// main method:
-	static CandidateSet fun(/* attribute set AT, target attribure D */);
+	static CandidateSet fun(const std::string& dataFilePath, 	// path to data file
+							const AttributeIds aIds,			// list of attribute Ids
+							const AttributeId targetId			// target attribute Id
+							);
 
 	// generate C_k+1 candidates from C_k:
-	static CandidateSet* funGen(CandidateSet ck);
+	static CandidateSet* funGen(CandidateSet* ck);
 
 	// all variants of "Holds" function:
 	static bool holds(Candidate* c, Partition* d);

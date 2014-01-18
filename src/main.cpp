@@ -30,6 +30,7 @@ int main() {
 
 		// ArrayRepresentation* ar = a->getArrayRepresentation();
 		// printArrayRepresentation(ar);
+		// delete ar;
 
 		// Partition* b = new Partition(10);
 		// ng = new Group();
@@ -53,16 +54,19 @@ int main() {
 
 		// return 0;
 
-		CandidateSet* cs = new CandidateSet();
-		Partition* d = new Partition();
+		// CandidateSet* cs = new CandidateSet();
+		// Partition* d = new Partition();
+
 		std::vector<int> aids;
 		aids.push_back(1); aids.push_back(2); aids.push_back(3); aids.push_back(4); aids.push_back(5);
-		Fun::generateInitialCandidates("tests/przyklad.csv", aids, 6, cs, d);
-		std::cout << "candidates generated" << std::endl;
-		d->print();
-		std::cout << "cs->getSize() = " << cs->getSize() << std::endl;
-		for (int i=0; i < cs->getSize(); ++i) {
-			(*cs)[i]->getPartition()->print();
-		}
+		// Fun::generateInitialCandidates("tests/przyklad.csv", aids, 6, cs, d);
+		// std::cout << "candidates generated" << std::endl;
+		// d->print();
+		// std::cout << "cs->getSize() = " << cs->getSize() << std::endl;
+		// for (int i=0; i < cs->getSize(); ++i) {
+		// 	(*cs)[i]->getPartition()->print();
+		// }
+
+		CandidateSet res = Fun::fun("tests/przyklad.csv", aids, 6);
 	}
 }

@@ -8,11 +8,24 @@ long CandidateSet::getSize() const {
 }
 
 // access candidates by index:
-Candidate* CandidateSet::operator[] (const long index) {
+Candidate* CandidateSet::operator[] (const long index) const {
 	return candidateList_[index];
 }
 
 // add a new candidate:
 void CandidateSet::addCandidate(Candidate* newCandidate) {
 	candidateList_.push_back(newCandidate);
+}
+
+// delete a candidate by index:
+void CandidateSet::deleteCandidate(long index) {
+	candidateList_.erase(candidateList_.begin() + index);
+}
+
+// for merging candidate sets:
+CandidateSet& CandidateSet::operator+=(const CandidateSet& rhs) {
+	for (int i=0; i < rhs.getSize(); ++i) {
+		addCandidate(rhs[i]);
+	}
+	return *this;
 }

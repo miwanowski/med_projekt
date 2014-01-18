@@ -63,7 +63,6 @@ void Fun::generateInitialCandidates(const std::string& dataFilePath, 	// path to
 		std::string headerLine;
 		std::getline(dataFile, headerLine);
 		std::vector<std::string> splitHeader = split(headerLine, ',');
-		//cs = new CandidateSet();
 		for (AttributeIds::const_iterator it = aIds.begin(); it != aIds.end(); ++it) {
 			Candidate* newCandidate = new Candidate(new Partition());
 			Candidate::AttributeList* newAttributeList = new Candidate::AttributeList();
@@ -78,7 +77,9 @@ void Fun::generateInitialCandidates(const std::string& dataFilePath, 	// path to
 			attributeLevels.push_back(std::vector<std::string>());
 		}
 		std::vector<std::string> targetLevels;
+		long dataLines = 0;
 		while (std::getline(dataFile, line)) {
+			dataLines++;
 			//std::cout << "parsing line: " << line << std::endl;
 			std::vector<std::string> splitLine = split(line, ',');
 			long instanceId;
@@ -116,10 +117,48 @@ void Fun::generateInitialCandidates(const std::string& dataFilePath, 	// path to
 				int groupId = l - targetLevels.begin();
 				targetPartition->getGroup(groupId)->insert(instanceId);
 			}
-
 		}
+		for (int i=0; i < cs->getSize(); ++i) {
+			(*cs)[i]->getPartition()->setTableSize(dataLines);
+		}
+		targetPartition->setTableSize(dataLines);
 		dataFile.close();
 	} else {
 		std::cout << "Unable to open the requested file." << std::endl;
 	}
+}
+
+// main method:
+CandidateSet Fun::fun(const std::string& dataFilePath, 	// path to data file
+					  const AttributeIds aIds,			// list of attribute Ids
+					  const AttributeId targetId		// target attribute Id
+					 ) {
+	CandidateSet* c1 = new CandidateSet();
+	Partition* d = new Partition();
+	generateInitialCandidates(dataFilePath, aIds, targetId, c1, d);
+	std::vector<CandidateSet*> candidateSets;
+	std::vector<CandidateSet*> resultSets;
+	candidateSets.push_back(c1);
+	// main loop:
+	for (int k=1; candidateSets[k-1]->getSize() != 0; ++k) {
+		resultSets.push_back(new CandidateSet());
+		for (int i=0; i < candidateSets[k-1]->getSize(); ++i) {
+			if (holds( (*candidateSets[k-1])[i], d) ) {
+				resultSets[k-1]->addCandidate((*candidateSets[k-1])[i]);
+				candidateSets[k-1]->deleteCandidate(i);
+			}
+		}
+		candidateSets.push_back(funGen(candidateSets[k-1]));
+	}
+	// merge result sets:
+	CandidateSet resultSet;
+	for (int i=0; i < resultSets.size(); ++i) {
+		resultSet += *resultSets[i];
+	}
+	return resultSet;
+}
+
+CandidateSet* Fun::funGen(CandidateSet* ck) {
+	// @TODO
+	return new CandidateSet();
 }
