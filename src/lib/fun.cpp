@@ -25,3 +25,22 @@ Partition* Fun::product(Partition* a, Partition* b) {
 	delete t;
 	return c;
 }
+
+bool Fun::holds(Candidate* c, Partition* d) {
+	ArrayRepresentation* t = d->getArrayRepresentation();
+	Partition* cp = c->getPartition();
+	for (long groupId = 0; groupId < cp->getGroupCount(); ++groupId) {
+		Group* group = cp->getGroup(groupId);
+		Group::const_iterator it = group->begin();
+		long firstGroup = (*t)[*it];
+		++it;
+		for (; it != group->end(); ++it) {
+			if (firstGroup != (*t)[*it]) {
+				delete t;
+				return false;
+			}
+		}
+	}
+	delete t;
+	return true;
+}
