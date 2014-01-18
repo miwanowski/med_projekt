@@ -31,7 +31,7 @@ public:
 
 	// accessors for attributeList_:
 	AttributeList* getAttributeList() const { return attributeList_; }  
-	void setAttributeList(AttributeList* newAttributeList) { attributeList_ = newAttributeList }
+	void setAttributeList(AttributeList* newAttributeList) { attributeList_ = newAttributeList; }
 };
 
 #endif
