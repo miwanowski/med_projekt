@@ -7,7 +7,7 @@ OBJS=$(subst .cpp,.o,$(SRCS))
 all: main
 
 main: $(OBJS)
-	g++ $(LDFLAGS) -o main.a $(OBJS)
+	g++ $(LDFLAGS) -o fun $(OBJS)
 
 clean:
 	$(RM) $(OBJS)
