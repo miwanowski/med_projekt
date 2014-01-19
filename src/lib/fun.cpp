@@ -141,6 +141,7 @@ CandidateSet Fun::fun(const std::string& dataFilePath, 	// path to data file
 	candidateSets.push_back(c1);
 	// main loop:
 	for (int k=1; candidateSets[k-1]->getSize() != 0; ++k) {
+		std::cout << "k=" << k << std::endl;
 		resultSets.push_back(new CandidateSet());
 		for (int i=0; i < candidateSets[k-1]->getSize(); ++i) {
 			if (holds( (*candidateSets[k-1])[i], d) ) {
@@ -159,6 +160,41 @@ CandidateSet Fun::fun(const std::string& dataFilePath, 	// path to data file
 }
 
 CandidateSet* Fun::funGen(CandidateSet* ck) {
-	// @TODO
-	return new CandidateSet();
+	CandidateSet* resultSet = new CandidateSet();
+	for (int i=0; i < ck->getSize()-1; ++i) {
+		for (int j=i+1; j < ck->getSize(); ++j) {
+			Candidate* cA = (*ck)[i];
+			Candidate* cB = (*ck)[j];
+			AttributeList::iterator itA = cA->getAttributeList()->begin();
+			AttributeList::iterator itB = cB->getAttributeList()->begin();
+			while(itA != cA->getAttributeList()->end()) {
+				if (itA - cA->getAttributeList()->begin() == cA->getAttributeList()->size()-1) {
+					Partition* newPartition = product(cA->getPartition(), cB->getPartition());
+					Candidate* newCandidate = new Candidate(newPartition);
+					AttributeList* newAttributeList = new AttributeList(*(cA->getAttributeList()));
+					newAttributeList->push_back(cB->getAttributeList()->back());
+					newCandidate->setAttributeList(newAttributeList);
+					resultSet->addCandidate(newCandidate);
+					std::cout << "generating ";
+					printAttributeList(newCandidate->getAttributeList());
+					std:: cout << " from ";
+					printAttributeList(cA->getAttributeList());
+					std:: cout << " and ";
+					printAttributeList(cB->getAttributeList());
+					std::cout << std::endl;
+				} else {
+					if (*itA != *itB)
+						break;
+				}
+				itA++;
+				itB++;
+			}
+		}
+	}
+	// !!!!!!!!!!!!!!!!!!! tu ma byc przycinanie drzewem mieszajacym resultSetu !!!!!!!!!!!!!!!!!!!
+	// ...
+	// ...
+	// ...
+	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	return resultSet;
 }

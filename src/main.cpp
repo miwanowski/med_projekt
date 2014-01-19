@@ -3,19 +3,10 @@
 #include <vector>
 
 #include "fun.h"
+#include "utils.h"
 
 typedef std::vector<long> ArrayRepresentation;
 typedef std::set<long> Group;
-
-void printArrayRepresentation(ArrayRepresentation* ar) {
-	int i = 0;
-	for (ArrayRepresentation::iterator it = ar->begin(); it != ar->end(); ++it) {
-		std::cout << i << ": " << *it << ", ";
-		i++;
-	}
-	std::cout << std::endl;
-}
-
 
 int main() {
 	{
@@ -59,14 +50,12 @@ int main() {
 
 		std::vector<int> aids;
 		aids.push_back(1); aids.push_back(2); aids.push_back(3); aids.push_back(4); aids.push_back(5);
-		// Fun::generateInitialCandidates("tests/przyklad.csv", aids, 6, cs, d);
-		// std::cout << "candidates generated" << std::endl;
-		// d->print();
-		// std::cout << "cs->getSize() = " << cs->getSize() << std::endl;
-		// for (int i=0; i < cs->getSize(); ++i) {
-		// 	(*cs)[i]->getPartition()->print();
-		// }
 
 		CandidateSet res = Fun::fun("tests/przyklad.csv", aids, 6);
+		std::cout << "Results:" << std::endl;
+		for (int i = 0; i < res.getSize(); ++i) {
+			printAttributeList(res[i]->getAttributeList());
+			std::cout << std::endl;
+		}
 	}
 }

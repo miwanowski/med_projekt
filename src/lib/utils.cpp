@@ -1,6 +1,7 @@
 #include <vector>
 #include <string>
 #include <sstream>
+#include <iostream>
 
 #include "utils.h"
 
@@ -17,4 +18,19 @@ std::vector<std::string> split(const std::string &s, char delim) {
     std::vector<std::string> elems;
     split(s, delim, elems);
     return elems;
+}
+
+void printArrayRepresentation(std::vector<long>* ar) {
+	int i = 0;
+	for (std::vector<long>::iterator it = ar->begin(); it != ar->end(); ++it) {
+		std::cout << i << ": " << *it << ", ";
+		i++;
+	}
+	std::cout << std::endl;
+}
+
+void printAttributeList(std::vector<std::string>* al) {
+	for (std::vector<std::string>::iterator it = al->begin(); it != al->end(); ++it) {
+		std::cout << *it << " ";
+	}
 }

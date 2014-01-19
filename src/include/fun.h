@@ -15,6 +15,7 @@ class Fun {
 public:
 	typedef Partition::ArrayRepresentation ArrayRepresentation;
 	typedef Partition::Group Group;
+	typedef Candidate::AttributeList AttributeList;
 	typedef int AttributeId;
 	typedef std::vector<AttributeId> AttributeIds;
 
