@@ -115,6 +115,72 @@ bool Fun::strippedHolds(Candidate* c, Partition* d) {
 	return true;
 }
 
+bool Fun::reducedStrippedHolds(Candidate* c, Partition* d) {
+	AttributeList al = *(c->getAttributeList());
+	//std::cout << "running holds for ";
+	//printAttributeList(&al);
+	//std::cout << std::endl;
+	//c->getPartition()->print();
+	ArrayRepresentation* t = d->getArrayRepresentation();
+	Partition* cp = c->getPartition();
+	bool holdsFlag = true;
+	//std::cout << "groupCount=" << cp->getGroupCount() << std::endl;
+	//std::cout << "singletonGroups=" << cp->getSingletonGroups() << std::endl;
+	for (long groupId = 0; groupId < cp->getGroupCount() - cp->getSingletonGroups(); ++groupId) {
+		//std::cout << "  groupid=" << groupId << std::endl;
+		Group* group = cp->getGroup(groupId);
+		Group::const_iterator it = group->begin();
+		long firstGroup = (*t)[*it];
+		//std::cout << "    firstGroup=" << firstGroup << std::endl;
+		if (firstGroup == -1) {
+			holdsFlag = false;
+		} else {
+			++it;
+			long nextGroup;
+			for (; it != group->end(); ++it) {
+				nextGroup = (*t)[*it];
+				//std::cout << "    nextGroup=" << nextGroup << std::endl;
+				if (firstGroup != nextGroup) {
+					holdsFlag = false;
+					break;
+				}
+			}
+			if (firstGroup == nextGroup) {
+				//std::cout << "deleting group " << groupId << std::endl;
+				cp->deleteGroup(groupId);
+				groupId--;
+			}
+		}
+	}
+	//std::cout << "holds returning " << holdsFlag << std::endl;
+	delete t;
+	return holdsFlag;
+}
+
+bool Fun::partReducedStrippedHolds(Candidate* c, Partition* d) {
+	ArrayRepresentation* t = d->getArrayRepresentation();
+	Partition* cp = c->getPartition();
+	for (long groupId = 0; groupId < cp->getGroupCount() - cp->getSingletonGroups(); ++groupId) {
+		Group* group = cp->getGroup(groupId);
+		Group::const_iterator it = group->begin();
+		long firstGroup = (*t)[*it];
+		if (firstGroup == -1) {
+			return false;
+		}
+		++it;
+		for (; it != group->end(); ++it) {
+			if (firstGroup != (*t)[*it]) {
+				delete t;
+				return false;
+			}
+		}
+		cp->deleteGroup(groupId);
+		groupId--;
+	}
+	delete t;
+	return true;
+}
+
 void Fun::generateInitialCandidates(const std::string& dataFilePath, 	// path to data file
 									const AttributeIds aIds,			// list of attribute Ids
 									const AttributeId targetId,			// target attribute Id

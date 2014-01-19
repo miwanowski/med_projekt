@@ -51,7 +51,7 @@ int main() {
 		std::vector<int> aids;
 		aids.push_back(1); aids.push_back(2); aids.push_back(3); aids.push_back(4); aids.push_back(5);
 
-		Fun::holdsVariant_ = &Fun::strippedHolds;
+		Fun::holdsVariant_ = &Fun::partReducedStrippedHolds;
 		Fun::productVariant_ = &Fun::strippedProduct;
 
 		CandidateSet res = Fun::fun("tests/przyklad.csv", aids, 6);
