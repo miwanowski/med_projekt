@@ -12,6 +12,9 @@
 #include "candidateset.h"
 
 class Fun {
+private:
+	Fun() { };
+
 public:
 	typedef Partition::ArrayRepresentation ArrayRepresentation;
 	typedef Partition::Group Group;
@@ -19,7 +22,11 @@ public:
 	typedef int AttributeId;
 	typedef std::vector<AttributeId> AttributeIds;
 
-	Fun(/* something here? */);
+	// pointer to the selected "holds" function variant
+	static bool (*holdsVariant_)(Candidate* c, Partition* d);
+
+	// pointer to the selected "product" function variant
+	static Partition* (*productVariant_)(Partition* a, Partition* b);
 
 	// main method:
 	static CandidateSet fun(const std::string& dataFilePath, 	// path to data file
@@ -38,7 +45,7 @@ public:
 
 	// all variants of "Product" function:
 	static Partition* product(Partition* a, Partition* b);
-	static Partition* strippedPoduct(Partition* a, Partition* b);
+	static Partition* strippedProduct(Partition* a, Partition* b);
 
 	// helper method for reading data file and generating initial candidates and partitions:
 	static void generateInitialCandidates(const std::string& dataFilePath, 	// path to data file

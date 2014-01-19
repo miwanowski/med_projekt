@@ -21,6 +21,7 @@ private:
 	// internal representation based on sets:
 	SetRepresentation setRepresentation_;
 	long tableSize_;
+	long singletonGroups_;
 
 public:
 	// construct an empty partition:
@@ -37,6 +38,10 @@ public:
 	long getTableSize() const { return tableSize_; }
 	void setTableSize(long tableSize) { tableSize_ = tableSize; }
 
+	// accessors for singletonGroups_:
+	long getSingletonGroups() const { return singletonGroups_; }
+	void setSingletonGroups(long singletonGroups) { singletonGroups_ = singletonGroups; }
+
 	// get the array representation:
 	ArrayRepresentation* getArrayRepresentation() const;
 
@@ -45,6 +50,9 @@ public:
 
 	// get a group by index:
 	Group* getGroup(long index) const;
+
+	// delete a group by index:
+	void deleteGroup(long index);
 
 	// print to stdout for debugging:
 	void print() const;

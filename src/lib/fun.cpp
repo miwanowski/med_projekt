@@ -10,6 +10,12 @@
 #include "candidate.h"
 #include "candidateset.h"
 
+// initialize the pointer to "holds" variant to default value: regular "holds":
+bool (*Fun::holdsVariant_)(Candidate* c, Partition* d)  = &Fun::holds;
+
+// initialize the pointer to "product" variant to default value: regular "product":
+Partition* (*Fun::productVariant_)(Partition* a, Partition* b)  = &Fun::product;
+
 Partition* Fun::product(Partition* a, Partition* b) {
 	Partition* c = new Partition(a->getTableSize());
 	ArrayRepresentation* t = a->getArrayRepresentation();
@@ -34,6 +40,40 @@ Partition* Fun::product(Partition* a, Partition* b) {
 	return c;
 }
 
+Partition* Fun::strippedProduct(Partition* a, Partition* b) {
+	Partition* c = new Partition(a->getTableSize());
+	long groupCount = b->getGroupCount();
+	ArrayRepresentation* t = a->getArrayRepresentation();
+	std::vector<Group*> s = std::vector<Group*>(a->getTableSize());
+
+	for (long groupId = 0; groupId < b->getGroupCount() - b->getSingletonGroups(); ++groupId) {
+		Group* group = b->getGroup(groupId);
+		Group aGroupIds;
+		for (Group::const_iterator it = group->begin(); it != group->end(); ++it) {
+			long j = (*t)[*it];
+			if (j == -1) {
+				groupCount++;
+			} else {
+				if (s[j] == NULL)
+					s[j] = new Group();
+				s[j]->insert(*it);
+				aGroupIds.insert(j);
+			}
+		}
+		for (Group::const_iterator it = aGroupIds.begin(); it != aGroupIds.end(); ++it) {
+			if (s[*it]->size() > 1) {
+				c->addGroup(s[*it]);
+			}
+			groupCount++;
+			s[*it] = NULL;
+		}
+		groupCount--;
+	}
+	delete t;
+	c->setSingletonGroups(groupCount - c->getGroupCount());
+	return c;
+}
+
 bool Fun::holds(Candidate* c, Partition* d) {
 	ArrayRepresentation* t = d->getArrayRepresentation();
 	Partition* cp = c->getPartition();
@@ -41,6 +81,28 @@ bool Fun::holds(Candidate* c, Partition* d) {
 		Group* group = cp->getGroup(groupId);
 		Group::const_iterator it = group->begin();
 		long firstGroup = (*t)[*it];
+		++it;
+		for (; it != group->end(); ++it) {
+			if (firstGroup != (*t)[*it]) {
+				delete t;
+				return false;
+			}
+		}
+	}
+	delete t;
+	return true;
+}
+
+bool Fun::strippedHolds(Candidate* c, Partition* d) {
+	ArrayRepresentation* t = d->getArrayRepresentation();
+	Partition* cp = c->getPartition();
+	for (long groupId = 0; groupId < cp->getGroupCount() - cp->getSingletonGroups(); ++groupId) {
+		Group* group = cp->getGroup(groupId);
+		Group::const_iterator it = group->begin();
+		long firstGroup = (*t)[*it];
+		if (firstGroup == -1) {
+			return false;
+		}
 		++it;
 		for (; it != group->end(); ++it) {
 			if (firstGroup != (*t)[*it]) {
@@ -122,6 +184,31 @@ void Fun::generateInitialCandidates(const std::string& dataFilePath, 	// path to
 			(*cs)[i]->getPartition()->setTableSize(dataLines);
 		}
 		targetPartition->setTableSize(dataLines);
+		// drop singleton groups if stripped partitions are used:
+		if (holdsVariant_ != holds) {
+			// for each candidate:
+			for (int i=0; i < cs->getSize(); ++i) {
+				Partition* p = (*cs)[i]->getPartition();
+				// for each group:
+				for (long j=0; j < p->getGroupCount(); ++j){
+					if (p->getGroup(j)->size() == 1) {
+						// delete singleton groups:
+						p->deleteGroup(j);
+						// but keep them counted:
+						p->setSingletonGroups(p->getSingletonGroups()+1);
+					}
+				}
+			}
+			// drop singleton groups from the target partition:
+			for (long j=0; j < targetPartition->getGroupCount(); ++j){
+				if (targetPartition->getGroup(j)->size() == 1) {
+					// delete singleton groups:
+					targetPartition->deleteGroup(j);
+					// but keep them counted:
+					targetPartition->setSingletonGroups(targetPartition->getSingletonGroups()+1);
+				}
+			}
+		}
 		dataFile.close();
 	} else {
 		std::cout << "Unable to open the requested file." << std::endl;
@@ -144,7 +231,7 @@ CandidateSet Fun::fun(const std::string& dataFilePath, 	// path to data file
 		std::cout << "k=" << k << std::endl;
 		resultSets.push_back(new CandidateSet());
 		for (int i=0; i < candidateSets[k-1]->getSize(); ++i) {
-			if (holds( (*candidateSets[k-1])[i], d) ) {
+			if ( (*holdsVariant_)((*candidateSets[k-1])[i], d) ) {
 				resultSets[k-1]->addCandidate((*candidateSets[k-1])[i]);
 				candidateSets[k-1]->deleteCandidate(i);
 			}
@@ -169,7 +256,7 @@ CandidateSet* Fun::funGen(CandidateSet* ck) {
 			AttributeList::iterator itB = cB->getAttributeList()->begin();
 			while(itA != cA->getAttributeList()->end()) {
 				if (itA - cA->getAttributeList()->begin() == cA->getAttributeList()->size()-1) {
-					Partition* newPartition = product(cA->getPartition(), cB->getPartition());
+					Partition* newPartition = (*productVariant_)(cA->getPartition(), cB->getPartition());
 					Candidate* newCandidate = new Candidate(newPartition);
 					AttributeList* newAttributeList = new AttributeList(*(cA->getAttributeList()));
 					newAttributeList->push_back(cB->getAttributeList()->back());
