@@ -48,13 +48,13 @@ int main() {
 		// CandidateSet* cs = new CandidateSet();
 		// Partition* d = new Partition();
 
-		std::vector<int> aids;
-		aids.push_back(1); aids.push_back(2); aids.push_back(3); aids.push_back(4); aids.push_back(5);
+		const int arr[] = {1,2,3,4,5,6,7,8,9,10,11,12,13,14};
+		std::vector<int> aids(arr, arr + sizeof(arr) / sizeof(arr[0]));
 
 		Fun::holdsVariant_ = &Fun::partReducedStrippedHolds;
 		Fun::productVariant_ = &Fun::strippedProduct;
 
-		CandidateSet res = Fun::fun("tests/przyklad.csv", aids, 6);
+		CandidateSet res = Fun::fun("tests/letter-recognition1000.csv", aids, 0);
 		std::cout << "Results:" << std::endl;
 		for (int i = 0; i < res.getSize(); ++i) {
 			printAttributeList(res[i]->getAttributeList());

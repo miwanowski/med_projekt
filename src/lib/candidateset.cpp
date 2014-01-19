@@ -29,3 +29,11 @@ CandidateSet& CandidateSet::operator+=(const CandidateSet& rhs) {
 	}
 	return *this;
 }
+
+// delete Partition objects from all contained candidates:
+void  CandidateSet::deletePartitions() {
+	for (int i=0; i < getSize(); ++i) {
+		delete candidateList_[i]->getPartition();
+		candidateList_[i]->setPartition(NULL);
+	}
+}

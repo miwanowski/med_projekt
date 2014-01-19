@@ -34,6 +34,9 @@ public:
 
 	// for merging candidate sets:
 	CandidateSet& operator+=(const CandidateSet& rhs);
+
+	// delete Partition objects from all contained candidates:
+	void deletePartitions();
 };
 
 #endif

@@ -2,7 +2,6 @@
 #include <fstream>
 #include <string>
 #include <iostream>
-#include <sstream>
 #include <algorithm>
 
 #include "fun.h"
@@ -210,9 +209,7 @@ void Fun::generateInitialCandidates(const std::string& dataFilePath, 	// path to
 			dataLines++;
 			//std::cout << "parsing line: " << line << std::endl;
 			std::vector<std::string> splitLine = split(line, ',');
-			long instanceId;
-			std::istringstream ss(splitLine[0]);
-			ss >> instanceId;
+			long instanceId = dataLines-1;
 			// update attribute partitions:
 			for (AttributeIds::const_iterator it = aIds.begin(); it != aIds.end(); ++it) {
 				int attNo = it - aIds.begin();
@@ -256,10 +253,11 @@ void Fun::generateInitialCandidates(const std::string& dataFilePath, 	// path to
 			for (int i=0; i < cs->getSize(); ++i) {
 				Partition* p = (*cs)[i]->getPartition();
 				// for each group:
-				for (long j=0; j < p->getGroupCount(); ++j){
+				for (long j=0; j < p->getGroupCount() - p->getSingletonGroups(); ++j){
 					if (p->getGroup(j)->size() == 1) {
 						// delete singleton groups:
 						p->deleteGroup(j);
+						j--;
 						// but keep them counted:
 						p->setSingletonGroups(p->getSingletonGroups()+1);
 					}
@@ -303,6 +301,7 @@ CandidateSet Fun::fun(const std::string& dataFilePath, 	// path to data file
 			}
 		}
 		candidateSets.push_back(funGen(candidateSets[k-1]));
+		candidateSets[k-1]->deletePartitions();
 	}
 	// merge result sets:
 	CandidateSet resultSet;
