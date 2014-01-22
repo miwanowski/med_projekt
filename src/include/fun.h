@@ -26,7 +26,7 @@ public:
 	typedef std::map<AttributeId, std::string> AttributeMap;
 
 	// the order of the used hash tree:
-	static int hashTreeOrder_;
+	static int hashTreeOrder;
 
 	// hash tree for candidate pruning:
 	static HashTree* hashTree;
@@ -39,6 +39,9 @@ public:
 
 	// pointer to the selected "product" function variant
 	static Partition* (*productVariant_)(Partition* a, Partition* b);
+
+	// flag indicating whether optional pruning is used:
+	static bool optionalPruning;
 
 	// main method:
 	static CandidateSet fun(const std::string& dataFilePath, 	// path to data file

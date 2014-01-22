@@ -21,7 +21,10 @@ Partition* (*Fun::productVariant_)(Partition* a, Partition* b)  = &Fun::product;
 HashTree* Fun::hashTree = NULL;
 
 // the default order of the used hash tree:
-int Fun::hashTreeOrder_ = 3;
+int Fun::hashTreeOrder = 3;
+
+// flag indicating whether optional pruning is used:
+bool Fun::optionalPruning = false;
 
 // mapping of attribute ids to names:
 Fun::AttributeMap Fun::attributeMap = Fun::AttributeMap();
@@ -196,7 +199,7 @@ void Fun::generateInitialCandidates(const std::string& dataFilePath, 	// path to
 		std::string headerLine;
 		std::getline(dataFile, headerLine);
 		std::vector<std::string> splitHeader = split(headerLine, ',');
-		hashTree = new HashTree(hashTreeOrder_);
+		hashTree = new HashTree(hashTreeOrder);
 		for (AttributeIds::const_iterator it = aIds.begin(); it != aIds.end(); ++it) {
 			attributeMap[*it] = splitHeader[*it];
 			Candidate* newCandidate = new Candidate(new Partition());
@@ -361,7 +364,7 @@ CandidateSet* Fun::funGen(CandidateSet* ck) {
 		}
 	}
 	delete hashTree;
-	hashTree = new HashTree(hashTreeOrder_);
+	hashTree = new HashTree(hashTreeOrder);
 	for (int i=0; i < resultSet->getSize(); ++i) {
 		hashTree->insertCandidate((*resultSet)[i]);
 	}

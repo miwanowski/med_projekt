@@ -1,64 +1,90 @@
 #include <iostream>
-#include <set>
 #include <vector>
+#include <string>
+#include <sstream>
 
 #include "fun.h"
 #include "utils.h"
 
-typedef std::vector<long> ArrayRepresentation;
-typedef std::set<long> Group;
+int main(int argc, char* argv[]) {
+		// display usage when given too few arguments:
+		if (argc < 4) {
+			std::cerr << "Usage: " << argv[0] << " <filename> <target_col> \"<col1>,...,<coln>\" [options]";
+			std::cerr << std::endl;
+			std::cerr << "Available options:" << std::endl;
+			std::cerr << "  --holds        : use Holds (default)" << std::endl;
+			std::cerr << "  --sholds       : use StrippedHolds" << std::endl;
+			std::cerr << "  --rsholds      : use ReducedStrippedHolds" << std::endl;
+			std::cerr << "  --prsholds     : use PartReducedStrippedHolds" << std::endl;
+			std::cerr << "  --product      : use Product (default)" << std::endl;
+			std::cerr << "  --sproduct     : use StrippedProduct" << std::endl;
+			std::cerr << "  --optprune     : use optional pruning" << std::endl;
+			std::cerr << "  --nooptprune   : don't use optional pruning (default)" << std::endl;
+			return 1;
+		}
 
-int main() {
-	{
-		// Partition* a = new Partition(10);
-		// Group* ng = new Group();
-		// ng->insert(0); ng->insert(1); ng->insert(2);
-		// a->addGroup(ng);
-		// ng = new Group();
-		// ng->insert(3); ng->insert(4); ng->insert(5); ng->insert(6); ng->insert(7); ng->insert(8); ng->insert(9); 
-		// a->addGroup(ng);
-		// a->print();
+		// get obligatory arguments:
+		std::string filename  		= argv[1];
+		std::string targetColString = argv[2];
+		std::string colString 		= argv[3];
 
-		// ArrayRepresentation* ar = a->getArrayRepresentation();
-		// printArrayRepresentation(ar);
-		// delete ar;
+		// parse target column:
+		std::istringstream ss(targetColString);
+		int targetCol;
+		ss >> targetCol;
 
-		// Partition* b = new Partition(10);
-		// ng = new Group();
-		// ng->insert(0);
-		// b->addGroup(ng);
-		// ng = new Group();
-		// ng->insert(1); ng->insert(2); ng->insert(3); ng->insert(4); ng->insert(5);
-		// b->addGroup(ng);
-		// ng = new Group();
-		// ng->insert(6); ng->insert(7); ng->insert(8); ng->insert(9);
-		// b->addGroup(ng);
-		// b->print();
+		// parse columns:
+		std::vector<std::string> splitColString = split(colString, ',');
+		std::vector<int> cols;
+		for (std::vector<std::string>::iterator i = splitColString.begin(); i != splitColString.end(); ++i) {
+			std::istringstream ss(*i);
+			int currentCol;
+			ss >> currentCol;
+			cols.push_back(currentCol);
+		}
 
-		// ar = b->getArrayRepresentation();
-		// printArrayRepresentation(ar);
+		// parse options:
+		for (int i=4; i < argc; ++i) {
+			std::string option = argv[i];
+			if (option == "--holds") {
+				Fun::holdsVariant_ = &Fun::holds;
+				// std::cout << "using regular holds" << std::endl;
+			} else if  (option == "--sholds") {
+				Fun::holdsVariant_ = &Fun::strippedHolds;
+				// std::cout << "using stripped holds" << std::endl;
+			} else if  (option == "--rsholds") {
+				Fun::holdsVariant_ = &Fun::reducedStrippedHolds;
+				// std::cout << "using reduced stripped holds" << std::endl;
+			} else if  (option == "--prsholds") {
+				Fun::holdsVariant_ = &Fun::partReducedStrippedHolds;
+				// std::cout << "using part reduced stripped holds" << std::endl;
+			} else if  (option == "--product") {
+				Fun::productVariant_ = &Fun::product;
+				// std::cout << "using regular product" << std::endl;
+			} else if  (option == "--sproduct") {
+				Fun::productVariant_ = &Fun::strippedProduct;
+				// std::cout << "using stripped product" << std::endl;
+			} else if  (option == "--optprune") {
+				Fun::optionalPruning = true;
+				// std::cout << "using optional pruning" << std::endl;
+			} else if  (option == "--nooptprune") {
+				Fun::optionalPruning = false;
+				// std::cout << "not using optional pruning" << std::endl;
+			} else {
+				std::cerr << "Unrecognized option: " << option << std::endl;
+				return 1;
+			}
+		}
 
-		// Partition* c = Fun::product(a, b);
-		// c->print();
-		// CandidateSet* cs = new CandidateSet();
-		// std::cout << "cs->getSize() = " << cs->getSize() << std::endl;
+		// execute the algorithm:
+		CandidateSet res = Fun::fun(filename, cols, targetCol);
 
-		// return 0;
-
-		// CandidateSet* cs = new CandidateSet();
-		// Partition* d = new Partition();
-
-		const int arr[] = {1,2,3,4,5,6,7,8,9,10,11,12,13,14};
-		std::vector<int> aids(arr, arr + sizeof(arr) / sizeof(arr[0]));
-
-		Fun::holdsVariant_ = &Fun::partReducedStrippedHolds;
-		Fun::productVariant_ = &Fun::strippedProduct;
-
-		CandidateSet res = Fun::fun("tests/letter-recognition1000.csv", aids, 0);
+		// output results:
 		std::cout << "Results:" << std::endl;
 		for (int i = 0; i < res.getSize(); ++i) {
 			printAttributeList(res[i]->getAttributeList());
 			std::cout << std::endl;
 		}
-	}
+
+		return 0;
 }
