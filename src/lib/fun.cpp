@@ -3,6 +3,7 @@
 #include <string>
 #include <iostream>
 #include <algorithm>
+#include <map>
 
 #include "fun.h"
 #include "utils.h"
@@ -14,6 +15,8 @@ bool (*Fun::holdsVariant_)(Candidate* c, Partition* d)  = &Fun::holds;
 
 // initialize the pointer to "product" variant to default value: regular "product":
 Partition* (*Fun::productVariant_)(Partition* a, Partition* b)  = &Fun::product;
+
+Fun::AttributeMap Fun::attributeMap = Fun::AttributeMap();
 
 Partition* Fun::product(Partition* a, Partition* b) {
 	Partition* c = new Partition(a->getTableSize());
@@ -115,11 +118,6 @@ bool Fun::strippedHolds(Candidate* c, Partition* d) {
 }
 
 bool Fun::reducedStrippedHolds(Candidate* c, Partition* d) {
-	AttributeList al = *(c->getAttributeList());
-	//std::cout << "running holds for ";
-	//printAttributeList(&al);
-	//std::cout << std::endl;
-	//c->getPartition()->print();
 	ArrayRepresentation* t = d->getArrayRepresentation();
 	Partition* cp = c->getPartition();
 	bool holdsFlag = true;
@@ -191,10 +189,9 @@ void Fun::generateInitialCandidates(const std::string& dataFilePath, 	// path to
 		std::getline(dataFile, headerLine);
 		std::vector<std::string> splitHeader = split(headerLine, ',');
 		for (AttributeIds::const_iterator it = aIds.begin(); it != aIds.end(); ++it) {
+			attributeMap[*it] = splitHeader[*it];
 			Candidate* newCandidate = new Candidate(new Partition());
-			Candidate::AttributeList* newAttributeList = new Candidate::AttributeList();
-			newAttributeList->push_back(splitHeader[*it]);
-			newCandidate->setAttributeList(newAttributeList);
+			newCandidate->addAttributeToList(*it);
 			cs->addCandidate(newCandidate);
 		}
 		std::string line;
@@ -317,22 +314,23 @@ CandidateSet* Fun::funGen(CandidateSet* ck) {
 		for (int j=i+1; j < ck->getSize(); ++j) {
 			Candidate* cA = (*ck)[i];
 			Candidate* cB = (*ck)[j];
-			AttributeList::iterator itA = cA->getAttributeList()->begin();
-			AttributeList::iterator itB = cB->getAttributeList()->begin();
-			while(itA != cA->getAttributeList()->end()) {
-				if (itA - cA->getAttributeList()->begin() == cA->getAttributeList()->size()-1) {
+			AttributeList alA = cA->getAttributeList();
+			AttributeList alB = cB->getAttributeList();
+			AttributeList::iterator itA = alA.begin();
+			AttributeList::iterator itB = alB.begin();
+			while(itA != alA.end()) {
+				if (itA - alA.begin() == alA.size() - 1) {
 					Partition* newPartition = (*productVariant_)(cA->getPartition(), cB->getPartition());
 					Candidate* newCandidate = new Candidate(newPartition);
-					AttributeList* newAttributeList = new AttributeList(*(cA->getAttributeList()));
-					newAttributeList->push_back(cB->getAttributeList()->back());
-					newCandidate->setAttributeList(newAttributeList);
+					newCandidate->setAttributeList(alA);
+					newCandidate->addAttributeToList(alB.back());
 					resultSet->addCandidate(newCandidate);
 					std::cout << "generating ";
 					printAttributeList(newCandidate->getAttributeList());
 					std:: cout << " from ";
-					printAttributeList(cA->getAttributeList());
+					printAttributeList(alA);
 					std:: cout << " and ";
-					printAttributeList(cB->getAttributeList());
+					printAttributeList(alB);
 					std::cout << std::endl;
 				} else {
 					if (*itA != *itB)

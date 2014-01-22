@@ -6,6 +6,7 @@
 #define FUN_H
 
 #include <string>
+#include <map>
 
 #include "partition.h"
 #include "candidate.h"
@@ -21,6 +22,9 @@ public:
 	typedef Candidate::AttributeList AttributeList;
 	typedef int AttributeId;
 	typedef std::vector<AttributeId> AttributeIds;
+	typedef std::map<AttributeId, std::string> AttributeMap;
+
+	static AttributeMap attributeMap;
 
 	// pointer to the selected "holds" function variant
 	static bool (*holdsVariant_)(Candidate* c, Partition* d);

@@ -4,6 +4,7 @@
 #include <iostream>
 
 #include "utils.h"
+#include "fun.h"
 
 std::vector<std::string> &split(const std::string &s, char delim, std::vector<std::string> &elems) {
     std::stringstream ss(s);
@@ -29,8 +30,8 @@ void printArrayRepresentation(std::vector<long>* ar) {
 	std::cout << std::endl;
 }
 
-void printAttributeList(std::vector<std::string>* al) {
-	for (std::vector<std::string>::iterator it = al->begin(); it != al->end(); ++it) {
-		std::cout << *it << " ";
+void printAttributeList(std::vector<int> al) {
+	for (std::vector<int>::iterator it = al.begin(); it != al.end(); ++it) {
+		std::cout << Fun::attributeMap[*it] << "(" << *it << ")" << " ";
 	}
 }

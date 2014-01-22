@@ -9,6 +9,7 @@
 
 #include <vector>
 #include <string>
+#include <iostream>
 
 #include "partition.h"
 
@@ -16,13 +17,13 @@ class Candidate
 {
 public:
 	// temporary, maybe attributeType should be something different:
-	typedef std::string attributeType;
-	typedef std::vector<attributeType> AttributeList;
+	typedef int AttributeType;
+	typedef std::vector<AttributeType> AttributeList;
 
 private:
 	// pointer to associated partition object:
 	Partition* partition_;
-	AttributeList* attributeList_;
+	AttributeList attributeList_;
 
 public:
 	// construct a candidate with a given partition:
@@ -33,8 +34,9 @@ public:
 	void setPartition(Partition* newPartition) { partition_ = newPartition; }
 
 	// accessors for attributeList_:
-	AttributeList* getAttributeList() const { return attributeList_; }  
-	void setAttributeList(AttributeList* newAttributeList) { attributeList_ = newAttributeList; }
+	AttributeList getAttributeList() const { return attributeList_; }  
+	void setAttributeList(AttributeList newAttributeList) { attributeList_ = newAttributeList; }
+	void addAttributeToList(AttributeType newAtt) { attributeList_.push_back(newAtt); }
 };
 
 #endif
