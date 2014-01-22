@@ -10,6 +10,10 @@ HashTree::HashTree(int order) {
 	root_ = new InternalNode(order_);
 }
 
+HashTree::~HashTree() {
+	delete root_;
+}
+
 // insert a new candidate into the tree
 void HashTree::insertCandidate(Candidate* newCandidate) {
 	AttributeList al = newCandidate->getAttributeList();

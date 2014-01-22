@@ -360,6 +360,7 @@ CandidateSet* Fun::funGen(CandidateSet* ck) {
 			i--;
 		}
 	}
+	delete hashTree;
 	hashTree = new HashTree(hashTreeOrder_);
 	for (int i=0; i < resultSet->getSize(); ++i) {
 		hashTree->insertCandidate((*resultSet)[i]);

@@ -31,6 +31,9 @@ public:
 	// constructor initializing order_ field and children table with NULLs:
 	InternalNode(int order) : order_(order), children_(order, (HashNode*)0 ) { };
 
+	// destructor that deletes children first:
+	~InternalNode();
+
 	// type identification:
 	bool isLeaf() { return false; };
 
@@ -38,25 +41,9 @@ public:
 	HashNode* getChild(int number) { return children_[number]; };
 	bool setChild(int number, HashNode* child) { children_[number] = child; }
 
-	void printNode(int level) {
-		for (int i=0; i < level; ++i) {
-			std::cout << "-";
-		}
-		std::cout << " internal node: [";
-		for (int i=0; i < order_; ++i) {
-			if (children_[i] == NULL)
-				std::cout << "n,";
-			else if (children_[i]->isLeaf())
-				std::cout << "l,";
-			else 
-				std::cout << "i,";
-		}
-		std::cout << "]" << std::endl;
-		for (int i=0; i < order_; ++i) {
-			if (children_[i] != NULL)
-				children_[i]->printNode(level+1);
-		}
-	}
+	// text representation:
+	void printNode(int level);
+
 };
 
 class LeafNode : public HashNode {
@@ -70,23 +57,8 @@ public:
 	// type identification:
 	bool isLeaf() { return true; };	
 
-	void printNode(int level) {
-		for (int i=0; i < level; ++i) {
-			std::cout << "-";
-		}
-		std::cout << " leaf node with candidates:" << std::endl;
-		for (int j=0; j < candidates_.size(); ++j) {
-			for (int i=0; i < level; ++i) {
-				std::cout << "-";
-			}
-			std::cout << " ";
-			for (int k=0; k < candidates_[j].size(); ++k) {
-				std::cout << candidates_[j][k] << " ";
-			}
-			std::cout << std::endl;
-		}
-		
-	}
+	// text representation:
+	void printNode(int level) ;
 
 	// public member with the list of candidates:
 	CandidateList candidates_;

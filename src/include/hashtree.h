@@ -31,7 +31,7 @@ public:
 	// construct a tree of a given order
 	HashTree(int order);
 
-	~HashTree(){ };
+	~HashTree();
 
 	// insert a new candidate into the tree
 	void insertCandidate(Candidate* newCandidate);
