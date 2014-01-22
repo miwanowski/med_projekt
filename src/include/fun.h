@@ -11,6 +11,7 @@
 #include "partition.h"
 #include "candidate.h"
 #include "candidateset.h"
+#include "hashtree.h"
 
 class Fun {
 private:
@@ -24,6 +25,13 @@ public:
 	typedef std::vector<AttributeId> AttributeIds;
 	typedef std::map<AttributeId, std::string> AttributeMap;
 
+	// the order of the used hash tree:
+	static int hashTreeOrder_;
+
+	// hash tree for candidate pruning:
+	static HashTree* hashTree;
+
+	// mapping of attribute ids to names:
 	static AttributeMap attributeMap;
 
 	// pointer to the selected "holds" function variant

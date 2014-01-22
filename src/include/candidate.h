@@ -37,6 +37,8 @@ public:
 	AttributeList getAttributeList() const { return attributeList_; }  
 	void setAttributeList(AttributeList newAttributeList) { attributeList_ = newAttributeList; }
 	void addAttributeToList(AttributeType newAtt) { attributeList_.push_back(newAtt); }
+
+	int getAttributeCount() const { return attributeList_.size(); };
 };
 
 #endif

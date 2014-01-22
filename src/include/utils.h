@@ -17,4 +17,6 @@ void printArrayRepresentation(std::vector<long>* ar);
 
 void printAttributeList(std::vector<int> al);
 
+bool isSubset(std::vector<int> A, std::vector<int> B);
+
 #endif

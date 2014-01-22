@@ -2,6 +2,7 @@
 #include <string>
 #include <sstream>
 #include <iostream>
+#include <algorithm>
 
 #include "utils.h"
 #include "fun.h"
@@ -34,4 +35,11 @@ void printAttributeList(std::vector<int> al) {
 	for (std::vector<int>::iterator it = al.begin(); it != al.end(); ++it) {
 		std::cout << Fun::attributeMap[*it] << "(" << *it << ")" << " ";
 	}
+}
+
+bool isSubset(std::vector<int> A, std::vector<int> B)
+{
+    std::sort(A.begin(), A.end());
+    std::sort(B.begin(), B.end());
+    return std::includes(A.begin(), A.end(), B.begin(), B.end());
 }

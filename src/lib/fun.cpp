@@ -9,6 +9,7 @@
 #include "utils.h"
 #include "candidate.h"
 #include "candidateset.h"
+#include "hashtree.h"
 
 // initialize the pointer to "holds" variant to default value: regular "holds":
 bool (*Fun::holdsVariant_)(Candidate* c, Partition* d)  = &Fun::holds;
@@ -16,6 +17,13 @@ bool (*Fun::holdsVariant_)(Candidate* c, Partition* d)  = &Fun::holds;
 // initialize the pointer to "product" variant to default value: regular "product":
 Partition* (*Fun::productVariant_)(Partition* a, Partition* b)  = &Fun::product;
 
+// hash tree for candidate pruning:
+HashTree* Fun::hashTree = NULL;
+
+// the default order of the used hash tree:
+int Fun::hashTreeOrder_ = 3;
+
+// mapping of attribute ids to names:
 Fun::AttributeMap Fun::attributeMap = Fun::AttributeMap();
 
 Partition* Fun::product(Partition* a, Partition* b) {
@@ -188,11 +196,13 @@ void Fun::generateInitialCandidates(const std::string& dataFilePath, 	// path to
 		std::string headerLine;
 		std::getline(dataFile, headerLine);
 		std::vector<std::string> splitHeader = split(headerLine, ',');
+		hashTree = new HashTree(hashTreeOrder_);
 		for (AttributeIds::const_iterator it = aIds.begin(); it != aIds.end(); ++it) {
 			attributeMap[*it] = splitHeader[*it];
 			Candidate* newCandidate = new Candidate(new Partition());
 			newCandidate->addAttributeToList(*it);
 			cs->addCandidate(newCandidate);
+			hashTree->insertCandidate(newCandidate);
 		}
 		std::string line;
 		std::vector<std::vector<std::string> > attributeLevels;
@@ -294,7 +304,9 @@ CandidateSet Fun::fun(const std::string& dataFilePath, 	// path to data file
 		for (int i=0; i < candidateSets[k-1]->getSize(); ++i) {
 			if ( (*holdsVariant_)((*candidateSets[k-1])[i], d) ) {
 				resultSets[k-1]->addCandidate((*candidateSets[k-1])[i]);
+				hashTree->deleteCandidate((*candidateSets[k-1])[i]);
 				candidateSets[k-1]->deleteCandidate(i);
+				i--;
 			}
 		}
 		candidateSets.push_back(funGen(candidateSets[k-1]));
@@ -325,13 +337,13 @@ CandidateSet* Fun::funGen(CandidateSet* ck) {
 					newCandidate->setAttributeList(alA);
 					newCandidate->addAttributeToList(alB.back());
 					resultSet->addCandidate(newCandidate);
-					std::cout << "generating ";
-					printAttributeList(newCandidate->getAttributeList());
-					std:: cout << " from ";
-					printAttributeList(alA);
-					std:: cout << " and ";
-					printAttributeList(alB);
-					std::cout << std::endl;
+					// std::cout << "generating ";
+					// printAttributeList(newCandidate->getAttributeList());
+					// std:: cout << " from ";
+					// printAttributeList(alA);
+					// std:: cout << " and ";
+					// printAttributeList(alB);
+					// std::cout << std::endl;
 				} else {
 					if (*itA != *itB)
 						break;
@@ -341,10 +353,16 @@ CandidateSet* Fun::funGen(CandidateSet* ck) {
 			}
 		}
 	}
-	// !!!!!!!!!!!!!!!!!!! tu ma byc przycinanie drzewem mieszajacym resultSetu !!!!!!!!!!!!!!!!!!!
-	// ...
-	// ...
-	// ...
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	// candidate pruning using hash tree:
+	for (int i=0; i < resultSet->getSize(); ++i) {
+		if (hashTree->findNumberOfPresentSubsets((*resultSet)[i]) != (*resultSet)[i]->getAttributeCount()) {
+			resultSet->deleteCandidate(i);
+			i--;
+		}
+	}
+	hashTree = new HashTree(hashTreeOrder_);
+	for (int i=0; i < resultSet->getSize(); ++i) {
+		hashTree->insertCandidate((*resultSet)[i]);
+	}
 	return resultSet;
 }

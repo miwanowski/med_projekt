@@ -2,6 +2,7 @@
 #include <string>
 
 #include "hashtree.h"
+#include "utils.h"
 
 // construct a tree of a given order
 HashTree::HashTree(int order) {
@@ -10,8 +11,8 @@ HashTree::HashTree(int order) {
 }
 
 // insert a new candidate into the tree
-void HashTree::insertCandidate(AttributeList al/*Candidate* newCandidate*/) {
-	//AttributeList al = newCandidate->getAttributeList();
+void HashTree::insertCandidate(Candidate* newCandidate) {
+	AttributeList al = newCandidate->getAttributeList();
 	AttributeList::iterator at = al.begin();
 	HashNode* currentNode = root_;
 	HashNode* parentNode = NULL;
@@ -41,15 +42,13 @@ void HashTree::insertCandidate(AttributeList al/*Candidate* newCandidate*/) {
 			it != ((LeafNode*)currentNode)->candidates_.end(); ++it)
 		{
 			int newHash = (*it)[depth] % order_;
-			if (newInternalNode->getChild(newHash) == NULL)
-			{
+			if (newInternalNode->getChild(newHash) == NULL) {
 				newInternalNode->setChild(newHash, new LeafNode());
 			}
 			((LeafNode*)newInternalNode->getChild(newHash))->candidates_.push_back(*it);
 		}
 		int newHash = *at % order_;
-		if (newInternalNode->getChild(newHash) == NULL)
-		{
+		if (newInternalNode->getChild(newHash) == NULL) {
 			newInternalNode->setChild(newHash, new LeafNode());
 		}
 		((LeafNode*)newInternalNode->getChild(newHash))->candidates_.push_back(al);
@@ -62,7 +61,8 @@ void HashTree::insertCandidate(AttributeList al/*Candidate* newCandidate*/) {
 }
 
 // delete a candidate from the tree
-void HashTree::deleteCandidate(AttributeList al /*Candidate *c*/) {
+void HashTree::deleteCandidate(Candidate *c) {
+	AttributeList al = c->getAttributeList();
 	HashNode* currentNode = root_;
 	for (AttributeList::iterator at = al.begin(); at != al.end(); ++at) {
 		int newHash = *at % order_;
@@ -70,23 +70,52 @@ void HashTree::deleteCandidate(AttributeList al /*Candidate *c*/) {
 		if (currentNode->isLeaf())
 			break;
 	}
-	for (CandidateList::iterator c = ((LeafNode*)currentNode)->candidates_.begin();
-			c != ((LeafNode*)currentNode)->candidates_.end(); ++c)
-	{
-		if (std::equal(c->begin(), c->end(), al.begin()))
-		{
-			((LeafNode*)currentNode)->candidates_.erase(c);
+	CandidateList::iterator ca = ((LeafNode*)currentNode)->candidates_.begin();
+	while (ca != ((LeafNode*)currentNode)->candidates_.end()) {
+		if (std::equal(ca->begin(), ca->end(), al.begin())) {
+			ca = ((LeafNode*)currentNode)->candidates_.erase(ca);
+		} else {
+			++ca;
 		}
 	}
 }
 
+// check if the tree contains a given candidate:
+bool HashTree::contains(AttributeList& al) const {
+	HashNode* currentNode = root_;
+	for (AttributeList::iterator at = al.begin(); at != al.end(); ++at) {
+		int newHash = *at % order_;
+		currentNode = ((InternalNode*)currentNode)->getChild(newHash);
+		if (currentNode == NULL)
+			return false;
+		if (currentNode->isLeaf())
+			break;
+	}
+	for (CandidateList::iterator c = ((LeafNode*)currentNode)->candidates_.begin();
+			c != ((LeafNode*)currentNode)->candidates_.end(); ++c) {
+		if (std::equal(c->begin(), c->end(), al.begin())) {
+			return true;
+		}
+	}
+	return false;
+}
+
 // find how many subsets of a given candidate already exist in a tree:
-int HashTree::findNumberOfPresentSubsets(AttributeList al /*Candidate* c*/) {
-	
+int HashTree::findNumberOfPresentSubsets(Candidate* c) const {
+	AttributeList al = c->getAttributeList();
+	int count=0;
+	for (AttributeList::iterator it = al.begin(); it != al.end(); ++it) {
+		AttributeList subset = al;
+		int offset = it - al.begin();
+		subset.erase(subset.begin() + offset);
+		if (contains(subset))
+			count++;
+	}
+	return count;
 }
 
 // for debugging:
-void HashTree::printTree() {
+void HashTree::printTree() const {
 	std::cout << std::endl;
 	root_->printNode(0);
 	std::cout << std::endl;
