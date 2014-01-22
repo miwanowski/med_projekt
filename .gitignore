@@ -12,5 +12,8 @@
 *.la
 *.a
 
+# Logs
+*.log
+
 # Final binary
 fun
