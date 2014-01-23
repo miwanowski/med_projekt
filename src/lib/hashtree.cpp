@@ -15,7 +15,7 @@ HashTree::~HashTree() {
 }
 
 // insert a new candidate into the tree
-void HashTree::insertCandidate(Candidate* newCandidate) {
+void HashTree::insertCandidate(Candidate* newCandidate, bool includeGroupCount) {
 	AttributeList al = newCandidate->getAttributeList();
 	AttributeList::iterator at = al.begin();
 	HashNode* currentNode = root_;
@@ -36,6 +36,9 @@ void HashTree::insertCandidate(Candidate* newCandidate) {
 		// arrived at a "hanging" branch, need to create a new leaf node:
 		currentNode = new LeafNode();
 		((LeafNode*)currentNode)->candidates_.push_back(al);
+		// for optional pruning:
+		if (includeGroupCount)
+			((LeafNode*)currentNode)->groupCounts_.push_back(newCandidate->getPartition()->getGroupCount());
 		((InternalNode*)parentNode)->setChild(lastHash, currentNode);
 	} else if (at != al.end()) {
 		// arrived at a leaf node and still have elements to hash,
@@ -50,17 +53,31 @@ void HashTree::insertCandidate(Candidate* newCandidate) {
 				newInternalNode->setChild(newHash, new LeafNode());
 			}
 			((LeafNode*)newInternalNode->getChild(newHash))->candidates_.push_back(*it);
+			// for optional pruning:
+			if (includeGroupCount) {
+				// move group counts from old leaf node to new leaf nodes:
+				int offset = it - ((LeafNode*)currentNode)->candidates_.begin();
+				long oldGroupCount = ((LeafNode*)currentNode)->groupCounts_[offset];
+				((LeafNode*)newInternalNode->getChild(newHash))->groupCounts_.push_back(oldGroupCount);
+			}
 		}
 		int newHash = *at % order_;
 		if (newInternalNode->getChild(newHash) == NULL) {
 			newInternalNode->setChild(newHash, new LeafNode());
 		}
 		((LeafNode*)newInternalNode->getChild(newHash))->candidates_.push_back(al);
+		// for optional pruning:
+		if (includeGroupCount)
+			((LeafNode*)newInternalNode->getChild(newHash))->
+					groupCounts_.push_back(newCandidate->getPartition()->getGroupCount());
 		delete currentNode;
 	} else {
 		// arrived at a leaf node and there are no more elements to hash,
 		// need to append the candidate to the list
 		((LeafNode*)currentNode)->candidates_.push_back(al);
+		// for optional pruning:
+		if (includeGroupCount)
+			((LeafNode*)currentNode)->groupCounts_.push_back(newCandidate->getPartition()->getGroupCount());
 	}
 }
 
@@ -85,7 +102,7 @@ void HashTree::deleteCandidate(Candidate *c) {
 }
 
 // check if the tree contains a given candidate:
-bool HashTree::contains(AttributeList& al) const {
+bool HashTree::contains(AttributeList& al, long groupCount) const {
 	HashNode* currentNode = root_;
 	for (AttributeList::iterator at = al.begin(); at != al.end(); ++at) {
 		int newHash = *at % order_;
@@ -98,21 +115,31 @@ bool HashTree::contains(AttributeList& al) const {
 	for (CandidateList::iterator c = ((LeafNode*)currentNode)->candidates_.begin();
 			c != ((LeafNode*)currentNode)->candidates_.end(); ++c) {
 		if (std::equal(c->begin(), c->end(), al.begin())) {
-			return true;
+			if (groupCount != 0) {
+				// optional pruning:
+				int offset = c - ((LeafNode*)currentNode)->candidates_.begin();
+				long testedGroupCount = ((LeafNode*)currentNode)->groupCounts_[offset];
+				if (testedGroupCount == groupCount)
+					return false;
+				else
+					return true;
+			} else {
+				return true;
+			}
 		}
 	}
 	return false;
 }
 
 // find how many subsets of a given candidate already exist in a tree:
-int HashTree::findNumberOfPresentSubsets(Candidate* c) const {
+int HashTree::findNumberOfPresentSubsets(Candidate* c, long groupCount) const {
 	AttributeList al = c->getAttributeList();
 	int count=0;
 	for (AttributeList::iterator it = al.begin(); it != al.end(); ++it) {
 		AttributeList subset = al;
 		int offset = it - al.begin();
 		subset.erase(subset.begin() + offset);
-		if (contains(subset))
+		if (contains(subset, groupCount))
 			count++;
 	}
 	return count;

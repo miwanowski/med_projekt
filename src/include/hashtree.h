@@ -34,13 +34,13 @@ public:
 	~HashTree();
 
 	// insert a new candidate into the tree
-	void insertCandidate(Candidate* newCandidate);
+	void insertCandidate(Candidate* newCandidate, bool includeGroupCount=false);
 
 	// find how many subsets of a given candidate already exist in a tree
-	int findNumberOfPresentSubsets(Candidate* c) const;
+	int findNumberOfPresentSubsets(Candidate* c, long groupCount=0) const;
 
 	// check if the tree contains a given candidate:
-	bool contains(AttributeList& al) const;
+	bool contains(AttributeList& al, long groupCount=0) const;
 
 		// delete a candidate from the tree
 	void deleteCandidate(Candidate *c);

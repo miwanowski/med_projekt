@@ -51,6 +51,9 @@ public:
 	// list type for storing candidates:
 	typedef std::vector<std::vector<int> > CandidateList;
 
+	// list type for storing group count in the corresponding partition:
+	typedef std::vector<long> GroupCounts;
+
 	// empty constructor:
 	LeafNode() { };
 
@@ -62,6 +65,10 @@ public:
 
 	// public member with the list of candidates:
 	CandidateList candidates_;
+
+	// public member with the list of group counts in the partition
+	// corresponding to each stored candidate:
+	GroupCounts groupCounts_;
 };
 
 #endif

@@ -205,7 +205,7 @@ void Fun::generateInitialCandidates(const std::string& dataFilePath, 	// path to
 			Candidate* newCandidate = new Candidate(new Partition());
 			newCandidate->addAttributeToList(*it);
 			cs->addCandidate(newCandidate);
-			hashTree->insertCandidate(newCandidate);
+			hashTree->insertCandidate(newCandidate, optionalPruning);
 		}
 		std::string line;
 		std::vector<std::vector<std::string> > attributeLevels;
@@ -358,7 +358,9 @@ CandidateSet* Fun::funGen(CandidateSet* ck) {
 	}
 	// candidate pruning using hash tree:
 	for (int i=0; i < resultSet->getSize(); ++i) {
-		if (hashTree->findNumberOfPresentSubsets((*resultSet)[i]) != (*resultSet)[i]->getAttributeCount()) {
+		long groupCount = optionalPruning ? (*resultSet)[i]->getPartition()->getGroupCount() : 0;
+		if (hashTree->findNumberOfPresentSubsets((*resultSet)[i], groupCount) 
+														!= (*resultSet)[i]->getAttributeCount()) {
 			resultSet->deleteCandidate(i);
 			i--;
 		}
@@ -366,7 +368,7 @@ CandidateSet* Fun::funGen(CandidateSet* ck) {
 	delete hashTree;
 	hashTree = new HashTree(hashTreeOrder);
 	for (int i=0; i < resultSet->getSize(); ++i) {
-		hashTree->insertCandidate((*resultSet)[i]);
+		hashTree->insertCandidate((*resultSet)[i], optionalPruning);
 	}
 	return resultSet;
 }
