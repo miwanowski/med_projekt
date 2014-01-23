@@ -80,7 +80,7 @@ int main(int argc, char* argv[]) {
 		CandidateSet res = Fun::fun(filename, cols, targetCol);
 
 		// output results:
-		std::cout << "Results:" << std::endl;
+		std::cout << "\nResults:" << std::endl;
 		for (int i = 0; i < res.getSize(); ++i) {
 			printAttributeList(res[i]->getAttributeList());
 			std::cout << std::endl;

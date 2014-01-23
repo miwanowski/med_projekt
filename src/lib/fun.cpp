@@ -302,7 +302,7 @@ CandidateSet Fun::fun(const std::string& dataFilePath, 	// path to data file
 	candidateSets.push_back(c1);
 	// main loop:
 	for (int k=1; candidateSets[k-1]->getSize() != 0; ++k) {
-		std::cout << "k=" << k << std::endl;
+		std::cout << "Iteration " << k << "..." << std::endl;
 		resultSets.push_back(new CandidateSet());
 		for (int i=0; i < candidateSets[k-1]->getSize(); ++i) {
 			if ( (*holdsVariant_)((*candidateSets[k-1])[i], d) ) {
