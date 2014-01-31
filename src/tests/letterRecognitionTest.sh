@@ -1,7 +1,7 @@
 #!/bin/bash
 
 TIMEFORMAT=%R
-> lrres.txt
+> results/lrres.txt
 
 cat ./letter-recognition.csv | head -n 100 > ./letter-recognition100.csv
 cat ./letter-recognition.csv | head -n 200 > ./letter-recognition200.csv
@@ -23,15 +23,15 @@ for filename in "${lrArray[@]}"
 do
 	echo $filename
 	echo $'\nH'
-	time ../fun $filename 0 "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16" >> lrres.txt 
+	time ../fun $filename 0 "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16" >> results/lrres.txt 
 	echo $'\nH/P'
-	time ../fun $filename 0 "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16" --optprune >> lrres.txt
+	time ../fun $filename 0 "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16" --optprune >> results/lrres.txt
 	echo $'\nSH'
-	time ../fun $filename 0 "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16" --sholds --sproduct >> lrres.txt
+	time ../fun $filename 0 "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16" --sholds --sproduct >> results/lrres.txt
 	echo $'\nSH/P'
-	time ../fun $filename 0 "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16" --sholds --sproduct --optprune >> lrres.txt
+	time ../fun $filename 0 "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16" --sholds --sproduct --optprune >> results/lrres.txt
 	echo $'\nPRSH'
-	time ../fun $filename 0 "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16" --prsholds --sproduct >> lrres.txt
+	time ../fun $filename 0 "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16" --prsholds --sproduct >> results/lrres.txt
 	echo $'\nRSH'
-	time ../fun $filename 0 "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16" --rsholds --sproduct >> lrres.txt
+	time ../fun $filename 0 "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16" --rsholds --sproduct >> results/lrres.txt
 done

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 TIMEFORMAT=%R
-> krkoptres.txt
+> results/krkoptres.txt
 
 cat ./krkopt.csv | head -n 2000 > ./krkopt2000.csv
 cat ./krkopt.csv | head -n 5000 > ./krkopt5000.csv
@@ -21,15 +21,15 @@ for filename in "${krkoptArray[@]}"
 do
 	echo $filename
 	echo $'\nH'
-	time ../fun $filename 6 "0,1,2,3,4,5" >> krkoptres.txt 
+	time ../fun $filename 6 "0,1,2,3,4,5" >> results/krkoptres.txt 
 	echo $'\nH/P'
-	time ../fun $filename 6 "0,1,2,3,4,5" --optprune >> krkoptres.txt
+	time ../fun $filename 6 "0,1,2,3,4,5" --optprune >> results/krkoptres.txt
 	echo $'\nSH'
-	time ../fun $filename 6 "0,1,2,3,4,5" --sholds --sproduct >> krkoptres.txt
+	time ../fun $filename 6 "0,1,2,3,4,5" --sholds --sproduct >> results/krkoptres.txt
 	echo $'\nSH/P'
-	time ../fun $filename 6 "0,1,2,3,4,5" --sholds --sproduct --optprune >> krkoptres.txt
+	time ../fun $filename 6 "0,1,2,3,4,5" --sholds --sproduct --optprune >> results/krkoptres.txt
 	echo $'\nPRSH'
-	time ../fun $filename 6 "0,1,2,3,4,5" --prsholds --sproduct >> krkoptres.txt
+	time ../fun $filename 6 "0,1,2,3,4,5" --prsholds --sproduct >> results/krkoptres.txt
 	echo $'\nRSH'
-	time ../fun $filename 6 "0,1,2,3,4,5" --rsholds --sproduct >> krkoptres.txt
+	time ../fun $filename 6 "0,1,2,3,4,5" --rsholds --sproduct >> results/krkoptres.txt
 done
