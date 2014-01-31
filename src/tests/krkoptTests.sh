@@ -33,3 +33,5 @@ do
 	echo $'\nRSH'
 	time ../fun $filename 6 "0,1,2,3,4,5" --rsholds --sproduct >> results/krkoptres.txt
 done
+
+rm *0.csv

@@ -30,3 +30,5 @@ do
 	echo $'\nRSH'
 	time ../fun $filename 8 "0,1,2,3,4,5,6,7" --rsholds --sproduct >> results/nres.txt
 done
+
+rm *0.csv
