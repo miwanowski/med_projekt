@@ -18,3 +18,9 @@
 
 # Final binary
 fun
+
+# Partial datasets
+*0.csv
+
+# Test results
+*res.txt
