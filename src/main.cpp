@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include <vector>
 #include <string>
 #include <sstream>
@@ -6,32 +7,76 @@
 #include "fun.h"
 #include "utils.h"
 
+void displayUsage(char* argv[]) {
+	std::cerr << "Usage: " << argv[0] << " <filename> <target_col> \"<col1>,...,<coln>\" [options]";
+	std::cerr << std::endl;
+	std::cerr << "Available options:" << std::endl;
+	std::cerr << "  --holds        : use Holds (default)" << std::endl;
+	std::cerr << "  --sholds       : use StrippedHolds" << std::endl;
+	std::cerr << "  --rsholds      : use ReducedStrippedHolds" << std::endl;
+	std::cerr << "  --prsholds     : use PartReducedStrippedHolds" << std::endl;
+	std::cerr << "  --product      : use Product (default)" << std::endl;
+	std::cerr << "  --sproduct     : use StrippedProduct" << std::endl;
+	std::cerr << "  --optprune     : use optional pruning" << std::endl;
+	std::cerr << "  --nooptprune   : don't use optional pruning (default)" << std::endl;
+}
+
 int main(int argc, char* argv[]) {
 		// display usage when given too few arguments:
-		if (argc < 4) {
-			std::cerr << "Usage: " << argv[0] << " <filename> <target_col> \"<col1>,...,<coln>\" [options]";
-			std::cerr << std::endl;
-			std::cerr << "Available options:" << std::endl;
-			std::cerr << "  --holds        : use Holds (default)" << std::endl;
-			std::cerr << "  --sholds       : use StrippedHolds" << std::endl;
-			std::cerr << "  --rsholds      : use ReducedStrippedHolds" << std::endl;
-			std::cerr << "  --prsholds     : use PartReducedStrippedHolds" << std::endl;
-			std::cerr << "  --product      : use Product (default)" << std::endl;
-			std::cerr << "  --sproduct     : use StrippedProduct" << std::endl;
-			std::cerr << "  --optprune     : use optional pruning" << std::endl;
-			std::cerr << "  --nooptprune   : don't use optional pruning (default)" << std::endl;
+		if (argc < 2) {
+			displayUsage(argv);
+			return 1;
+		}
+		// get obligatory arguments:
+		std::string filename  		= argv[1];
+		bool paramsInsideDataFile   = false;
+
+		// check if params are defined inside data file:
+		std::string headerLine;
+		std::ifstream dataFile (filename.c_str());
+		if (dataFile.is_open()) {
+			std::getline(dataFile, headerLine);
+			if (headerLine[0] == '#') {
+				paramsInsideDataFile = true;
+			}
+			dataFile.close();
+		}
+
+		if (!paramsInsideDataFile && argc < 4) {
+			displayUsage(argv);
 			return 1;
 		}
 
-		// get obligatory arguments:
-		std::string filename  		= argv[1];
-		std::string targetColString = argv[2];
-		std::string colString 		= argv[3];
+		std::string targetColString;
+		std::string colString;
 
+		if (paramsInsideDataFile) {
+			std::vector<std::string> splitFileParams = split(headerLine.substr(1), ' ');
+			if (splitFileParams.size() != 2) {
+				std::cerr << "Improper parameters defined inside the data file!" << std::endl;
+				std::cerr << "Correct format of the optional first line inside the data file is:" << std::endl;
+				std::cerr << "#<target_col> <col1>,...,<coln>" << std::endl;
+				return 1;
+			}
+			targetColString = splitFileParams[0];
+			colString 		= splitFileParams[1];
+		}
+		int i;
+		// get command line arguments:
+		if (argc >= 4 && argv[2][0] != '-' && argv[3][0] != '-') {
+			targetColString = argv[2];
+			colString 		= argv[3];
+			i = 4;
+		} else {
+			i = 2;
+		}
 		// parse target column:
 		std::istringstream ss(targetColString);
 		int targetCol;
 		ss >> targetCol;
+
+		std::cout<< "targetCol=" << targetCol << std::endl;
+		std::cout<< "cols=" << colString << std::endl << std::endl;
 
 		// parse columns:
 		std::vector<std::string> splitColString = split(colString, ',');
@@ -42,9 +87,8 @@ int main(int argc, char* argv[]) {
 			ss >> currentCol;
 			cols.push_back(currentCol);
 		}
-
 		// parse options:
-		for (int i=4; i < argc; ++i) {
+		for (; i < argc; ++i) {
 			std::string option = argv[i];
 			if (option == "--holds") {
 				Fun::holdsVariant_ = &Fun::holds;

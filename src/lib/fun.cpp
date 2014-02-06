@@ -198,6 +198,10 @@ void Fun::generateInitialCandidates(const std::string& dataFilePath, 	// path to
 	if (dataFile.is_open()) {
 		std::string headerLine;
 		std::getline(dataFile, headerLine);
+		if (headerLine[0] == '#') {
+			// skip the optional line containing program params
+			std::getline(dataFile, headerLine);
+		}
 		std::vector<std::string> splitHeader = split(headerLine, ',');
 		hashTree = new HashTree(hashTreeOrder);
 		for (AttributeIds::const_iterator it = aIds.begin(); it != aIds.end(); ++it) {
